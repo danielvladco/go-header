@@ -37,15 +37,16 @@ func (s *subscription[H]) NextHeader(ctx context.Context) (H, error) {
 		var zero H
 		return zero, err
 	}
-	log.Debugw("received message", "topic", msg.Message.GetTopic(), "sender", msg.ReceivedFrom)
+	log.Infow("received message", "topic", msg.Message.GetTopic(), "sender", msg.ReceivedFrom)
 
-	header, ok := msg.ValidatorData.(H)
+	headerf, ok := msg.ValidatorData.(H)
 	if !ok {
-		panic(fmt.Sprintf("invalid type received %s", reflect.TypeOf(msg.ValidatorData)))
+		//panic(fmt.Sprintf("invalid type received %s", reflect.TypeOf(msg.ValidatorData)))
+		return headerf, fmt.Errorf("invalid type received %s", reflect.TypeOf(msg.ValidatorData))
 	}
 
-	log.Debugw("received new Header", "height", header.Height(), "hash", header.Hash())
-	return header, nil
+	log.Infow("received new Header", "height", headerf.Height(), "hash", headerf.Hash())
+	return headerf, nil
 }
 
 // Cancel cancels the subscription to new Headers from the network.

@@ -26,6 +26,7 @@ func (h Hash) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON deserializes JSON representation of a Hash into object.
 func (h *Hash) UnmarshalJSON(data []byte) error {
+	fmt.Printf("UMARSHAL DUMMY DATA: %v - %s \n", data, data)
 	if len(data) < 2 || data[0] != '"' || data[len(data)-1] != '"' {
 		return fmt.Errorf("invalid hex string: %s", data)
 	}

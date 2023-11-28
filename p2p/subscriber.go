@@ -67,8 +67,10 @@ func NewSubscriber[H header.Header[H]](
 // Start starts the Subscriber, registering a topic validator for the "header-sub"
 // topic and joining it.
 func (s *Subscriber[H]) Start(context.Context) (err error) {
+	fmt.Println("CHECKME - SUBSCRIBER ABOUT TO START")
 	log.Infow("joining topic", "topic ID", s.pubsubTopicID)
 	s.topic, err = s.pubsub.Join(s.pubsubTopicID, pubsub.WithTopicMessageIdFn(s.msgID))
+	fmt.Println("CHECKME - SUBSCRIBER STARTED")
 	return err
 }
 
