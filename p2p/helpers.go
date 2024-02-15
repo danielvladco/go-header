@@ -74,9 +74,13 @@ func sendMessage(
 		return nil, 0, 0, fmt.Errorf("header/p2p: failed to write a request: %w", err)
 	}
 
-	err = stream.CloseWrite()
-	if err != nil {
-		return nil, 0, 0, err
+	if err := stream.CloseWrite(); err != nil {
+		// FIXME: Alright what happens here is that stream itself can be closed from javascript
+		// during await() and what happens afterwards that Received STOP_SENDING is the error returned
+		// even tho the data is here and all is working correctly. This is a temporary fix.
+		if !strings.Contains(err.Error(), "STOP_SENDING") {
+			return nil, 0, 0, err
+		}
 	}
 
 	headers := make([]*p2p_pb.HeaderResponse, 0)
@@ -108,7 +112,11 @@ func sendMessage(
 
 	if err == nil {
 		if closeErr := stream.Close(); closeErr != nil {
-			log.Errorw("closing stream", "err", closeErr)
+			// FIXME: Similar problem like above, where JS catch {} is returned back on already
+			// closed connection. This connection is closed via javascript itself, not us.
+			if !strings.Contains(closeErr.Error(), "JS catch") {
+				log.Errorw("closing stream", "err", closeErr)
+			}
 		}
 	} else {
 		// reset stream in case of an error

@@ -65,6 +65,7 @@ func (s *Syncer[H]) subjectiveHead(ctx context.Context) (H, error) {
 	if !pendHead.IsZero() {
 		return pendHead, nil
 	}
+
 	// if pending is empty - get the latest stored/synced head
 	storeHead, err := s.store.Head(ctx)
 	if err != nil {
@@ -78,16 +79,19 @@ func (s *Syncer[H]) subjectiveHead(ctx context.Context) (H, error) {
 	log.Infow("stored head header expired", "height", storeHead.Height())
 	// single-flight protection
 	// ensure only one Head is requested at the time
+
 	if !s.getter.Lock() {
 		// means that other routine held the lock and set the subjective head for us,
 		// so just recursively get it
 		return s.subjectiveHead(ctx)
 	}
 	defer s.getter.Unlock()
+
 	trustHead, err := s.getter.Head(ctx)
 	if err != nil {
 		return trustHead, err
 	}
+
 	// and set it as the new subjective head without validation,
 	// or, in other words, do 'automatic subjective initialization'
 	// NOTE: we avoid validation as the head expired to prevent possibility of the Long-Range Attack

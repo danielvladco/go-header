@@ -3,7 +3,6 @@ package p2p
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/libp2p/go-libp2p/core/host"
@@ -58,13 +57,9 @@ func NewExchangeServer[H header.Header[H]](
 
 // Start sets the stream handler for inbound header-related requests.
 func (serv *ExchangeServer[H]) Start(context.Context) error {
-	fmt.Println("CHECKME - EXCHANGE SERVER ABOUT TO START")
-
 	serv.ctx, serv.cancel = context.WithCancel(context.Background())
 	log.Infow("server: listening for inbound header requests", "protocol ID", serv.protocolID)
-
 	serv.host.SetStreamHandler(serv.protocolID, serv.requestHandler)
-	fmt.Println("CHECKME - EXCHANGE SERVER STARTED")
 	return nil
 }
 
