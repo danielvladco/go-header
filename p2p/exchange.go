@@ -155,6 +155,7 @@ func (ex *Exchange[H]) Head(ctx context.Context, opts ...header.HeadOption[H]) (
 	)
 	for _, from := range peers {
 		go func(from peer.ID) {
+			fmt.Println("WHAT IS THE PEER", from)
 			headers, err := ex.request(reqCtx, from, headerReq)
 			if err != nil {
 				log.Errorw("head request to peer failed", "peer", from, "err", err)

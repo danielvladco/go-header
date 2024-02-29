@@ -2,6 +2,7 @@ package p2p
 
 import (
 	"context"
+	"strings"
 	"sync"
 	"time"
 
@@ -106,12 +107,28 @@ func (p *peerTracker) bootstrap(ctx context.Context, trusted []libpeer.ID) error
 
 // connectToPeer attempts to connect to the given peer.
 func (p *peerTracker) connectToPeer(ctx context.Context, peer libpeer.ID) {
-	err := p.host.Connect(ctx, p.host.Peerstore().PeerInfo(peer))
+	peerAddr := p.host.Peerstore().PeerInfo(peer)
+
+	// Do not allow connectivity to addresses that are not secure web transports...
+	//if !p.isSecureWebTransport(peerAddr) {
+	//	return
+	//}
+
+	err := p.host.Connect(ctx, peerAddr)
 	if err != nil {
 		log.Debugw("failed to connect to peer", "id", peer.String(), "err", err)
 		return
 	}
 	log.Debugw("connected to peer", "id", peer.String())
+}
+
+func (p *peerTracker) isSecureWebTransport(info libpeer.AddrInfo) bool {
+	if strings.Contains(info.String(), "ip4") && strings.Contains(info.String(), "udp") &&
+		strings.Contains(info.String(), "quic-v1") && strings.Contains(info.String(), "certhash") {
+		return true
+	}
+
+	return false
 }
 
 func (p *peerTracker) track() {
