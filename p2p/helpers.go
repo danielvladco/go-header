@@ -114,7 +114,7 @@ func sendMessage(
 		if closeErr := stream.Close(); closeErr != nil {
 			// FIXME: Similar problem like above, where JS catch {} is returned back on already
 			// closed connection. This connection is closed via javascript itself, not us.
-			if !strings.Contains(closeErr.Error(), "JS catch") {
+			if !strings.Contains(closeErr.Error(), "await errors") {
 				log.Errorw("closing stream", "err", closeErr)
 			}
 		}

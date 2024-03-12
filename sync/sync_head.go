@@ -3,6 +3,7 @@ package sync
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/celestiaorg/go-header"
@@ -40,7 +41,7 @@ func (s *Syncer[H]) Head(ctx context.Context, _ ...header.HeadOption[H]) (H, err
 	defer s.getter.Unlock()
 	netHead, err := s.getter.Head(ctx, header.WithTrustedHead[H](sbjHead))
 	if err != nil {
-		log.Warnw("failed to get recent head, returning current subjective", "sbjHead", sbjHead.Height(), "err", err)
+		log.Debugw("failed to get recent head, returning current subjective", "sbjHead", sbjHead.Height(), "err", err)
 		return s.subjectiveHead(ctx)
 	}
 	// process and validate netHead fetched from trusted peers
@@ -176,12 +177,15 @@ func (s *Syncer[H]) verify(ctx context.Context, newHead H) (bool, error) {
 
 	var verErr *header.VerifyError
 	if errors.As(err, &verErr) && !verErr.SoftFailure {
-		log.Errorw("invalid network header",
-			"height_of_invalid", newHead.Height(),
-			"hash_of_invalid", newHead.Hash(),
-			"height_of_subjective", sbjHead.Height(),
-			"hash_of_subjective", sbjHead.Hash(),
-			"reason", verErr.Reason)
+		// TODO: Figure out why are we getting so many same block headers
+		if !strings.Contains(verErr.Reason.Error(), "known header") {
+			log.Errorw("invalid network header",
+				"height_of_invalid", newHead.Height(),
+				"hash_of_invalid", newHead.Hash(),
+				"height_of_subjective", sbjHead.Height(),
+				"hash_of_subjective", sbjHead.Hash(),
+				"reason", verErr.Reason)
+		}
 	}
 
 	return verErr.SoftFailure, err

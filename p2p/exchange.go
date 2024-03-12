@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
+	"strings"
 	"time"
 
 	logging "github.com/ipfs/go-log/v2"
@@ -172,8 +173,12 @@ func (ex *Exchange[H]) Head(ctx context.Context, opts ...header.HeadOption[H]) (
 						headerRespCh <- headers[0]
 						return
 					}
-					log.Errorw("verifying head received from tracked peer", "tracked peer", from,
-						"height", headers[0].Height(), "err", err)
+
+					if !strings.Contains(verErr.Reason.Error(), "known header") {
+						log.Errorw("verifying head received from tracked peer", "tracked peer", from,
+							"height", headers[0].Height(), "err", err)
+					}
+
 					headerRespCh <- zero
 					return
 
