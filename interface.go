@@ -10,7 +10,10 @@ import (
 
 const (
 	// MaxRangeRequestSize defines the max amount of headers that can be handled/requested at once.
-	MaxRangeRequestSize uint64 = 512
+	// 512 / 4 = 128 - This is a temporary solution to speed up the header sync process
+	// announcement. With 512 it can take up to like 5-10 minutes for status to update.
+	// TODO See if we even want this or it's just fine to be slower.
+	MaxRangeRequestSize uint64 = 128 // Initial 512
 )
 
 // Subscriber encompasses the behavior necessary to

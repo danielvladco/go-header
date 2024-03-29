@@ -309,10 +309,7 @@ func (s *Syncer[H]) requestHeaders(
 	amount := to - fromHead.Height()
 	// start requesting headers until amount remaining will be 0
 	for amount > 0 {
-		// 512 / 4 = 128 - This is a temporary solution to speed up the header sync process
-		// announcement. With 512 it can take up to like 5-10 minutes for status to update.
-		// TODO See if we even want this or it's just fine to be slower.
-		size := header.MaxRangeRequestSize / 4
+		size := header.MaxRangeRequestSize
 		if amount < size {
 			size = amount
 		}
